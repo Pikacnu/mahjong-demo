@@ -1,0 +1,29 @@
+{
+  "name": "mahjong-demo",
+  "version": "1.0.0",
+  "description": "Mahjong Library Demo - Japanese Mahjong Rules Engine",
+  "main": "src/main.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "vite": "^4.4.9",
+    "typescript": "^5.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.0"
+  },
+  "keywords": [
+    "mahjong",
+    "japanese-mahjong",
+    "yaku",
+    "riichi",
+    "tiles"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

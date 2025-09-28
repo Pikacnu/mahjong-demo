@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mahjong Library Demo - Japanese Mahjong Rules Engine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: black;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-button:hover {
+            background: #e9ecef;
+        }
+
+        .tab-button.active {
+            background: white;
+            border-bottom-color: #007cba;
+            color: #007cba;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .demo-section {
+            margin-bottom: 30px;
+            padding: 25px;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+
+        .demo-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .tile {
+            display: inline-block;
+            width: 45px;
+            height: 65px;
+            border: 2px solid #333;
+            margin: 3px;
+            text-align: center;
+            line-height: 61px;
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .tile:hover {
+            transform: translateY(-2px);
+            box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .red-tile {
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .yaku-result {
+            background: linear-gradient(145deg, #d4edda, #c3e6cb);
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .yaku-result strong {
+            color: #155724;
+        }
+
+        .btn {
+            background: linear-gradient(145deg, #007cba, #0056b3);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            margin: 2px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(145deg, #0056b3, #004085);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(145deg, #6c757d, #5a6268);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(145deg, #5a6268, #495057);
+        }
+
+        .btn-success {
+            background: linear-gradient(145deg, #28a745, #1e7e34);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(145deg, #1e7e34, #155724);
+        }
+
+        .input-area {
+            margin: 20px 0;
+        }
+
+        .input-area label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        textarea,
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #007cba;
+            box-shadow: 0 0 0 3px rgba(0, 124, 186, 0.1);
+        }
+
+        textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-card h4 {
+            color: #007cba;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007cba;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        /* Custom Yaku Styles */
+        .custom-yaku-form {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .custom-yaku-form h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            height: 150px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+        }
+
+        .custom-yaku-examples {
+            margin: 20px 0;
+        }
+
+        .custom-yaku-examples h4 {
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .example-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .custom-yaku-item {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .custom-yaku-item h4 {
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .custom-yaku-item pre {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+
+        .custom-yaku-item button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .custom-yaku-item button:hover {
+            background: #c82333;
+        }
+
+        .test-result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+        }
+
+        /* New styles for enhanced features */
+        .yaku-item-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .yaku-item-actions button {
+            padding: 5px 15px !important;
+            font-size: 14px !important;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content.large {
+            max-width: 95%;
+            width: 800px;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6c757d;
+        }
+
+        .modal-close:hover {
+            color: #dc3545;
+        }
+
+        .modal-body {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .library-yaku-item {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .library-yaku-item h4 {
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .library-item-actions {
+            margin: 15px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .library-yaku-item details {
+            margin-top: 10px;
+        }
+
+        .library-yaku-item summary {
+            cursor: pointer;
+            color: #007cba;
+            margin-bottom: 5px;
+        }
+
+        /* Yaku Manager Styles */
+        .yaku-manager-header {
+            margin-bottom: 20px;
+        }
+
+        .yaku-manager-header h3 {
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .yaku-manager-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .yaku-manager-item {
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+        }
+
+        .yaku-manager-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .yaku-manager-item.incomplete {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding-left: 12px;
+        }
+
+        .yaku-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .yaku-checkbox-label input[type="checkbox"] {
+            margin: 0;
+        }
+
+        .yaku-name {
+            flex: 1;
+            color: #495057;
+        }
+
+        .incomplete-badge {
+            background: #ffc107;
+            color: #212529;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .yaku-manager-footer {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .yaku-manager-footer p {
+            margin: 5px 0;
+        }
+
+        /* Yaku Browser Styles */
+        .yaku-browser-header {
+            margin-bottom: 20px;
+        }
+
+        .yaku-browser-header h3 {
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .yaku-section {
+            margin: 30px 0;
+        }
+
+        .yaku-section h4 {
+            color: #6c757d;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+
+        .yaku-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 12px;
+            margin: 15px 0;
+        }
+
+        .yaku-item {
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            transition: all 0.2s ease;
+        }
+
+        .yaku-item.enabled {
+            background-color: #f8fff8;
+            border-color: #28a745;
+        }
+
+        .yaku-item.disabled {
+            background-color: #fff8f8;
+            border-color: #dc3545;
+            opacity: 0.7;
+        }
+
+        .yaku-item.incomplete {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+        }
+
+        .yaku-item.custom {
+            border-left: 4px solid #007cba;
+        }
+
+        .yaku-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .yaku-name {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .yaku-han {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-left: 8px;
+        }
+
+        .yaku-type {
+            font-size: 0.8em;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+
+        .yaku-browser-footer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .tour-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tour-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .tour-step h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+
+        .tour-progress {
+            background: #e9ecef;
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .tour-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .tour-highlight {
+            animation: highlight 2s ease-in-out;
+            border: 3px solid #007cba !important;
+            border-radius: 8px !important;
+        }
+
+        @keyframes highlight {
+
+            0%,
+            100% {
+                border-color: #007cba;
+                box-shadow: 0 0 0 0 rgba(0, 124, 186, 0.7);
+            }
+
+            50% {
+                border-color: #0056b3;
+                box-shadow: 0 0 0 10px rgba(0, 124, 186, 0);
+            }
+        }
+
+        .definition-type-card {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .definition-type-card h5 {
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .definition-type-card code {
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: block;
+            margin-top: 8px;
+        }
+
+        .tutorial-step {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .tutorial-step h4 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+
+        .advanced-example {
+            background: #f8f9fa;
+            border-left: 4px solid #007cba;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .best-practices {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tile {
+                width: 35px;
+                height: 50px;
+                line-height: 46px;
+                font-size: 12px;
+            }
+
+            .main-content {
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Mahjong Library Demo</h1>
+            <p>Complete Japanese Mahjong Rules Engine with Yaku Detection, Scoring, and Analysis</p>
+        </div>
+
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab-button active" onclick="showTab('overview')">Overview</button>
+                <button class="tab-button" onclick="showTab('analyzer')">Hand Analyzer</button>
+                <button class="tab-button" onclick="showTab('examples')">Examples</button>
+                <button class="tab-button" onclick="showTab('custom')">Custom Yaku</button>
+                <button class="tab-button" onclick="showTab('docs')">Documentation</button>
+            </div>
+
+            <div id="overview" class="tab-content active">
+                <div class="demo-section">
+                    <h3>Features</h3>
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h4>Yaku Detection</h4>
+                            <p>Complete yaku detection system supporting all standard Japanese mahjong winning hands</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Hand Analysis</h4>
+                            <p>Automatic analysis of tile combinations and hand structures</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Tenpai Detection</h4>
+                            <p>Fast detection of possible winning tiles and waiting patterns</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>Furiten Checking</h4>
+                            <p>Prevents illegal wins with comprehensive furiten detection</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="demo-section">
+                    <h3>Technical Specifications</h3>
+                    <ul style="list-style-position: inside; line-height: 2;">
+                        <li>TypeScript implementation with full type safety</li>
+                        <li>Comprehensive test coverage (80+ test cases)</li>
+                        <li>Modular architecture for easy extension</li>
+                        <li>Support for most standard yaku (1-han to yakuman, with limitations)</li>
+                        <li>Red dora tile handling</li>
+                        <li>Open/closed hand distinction</li>
+                        <li>Multiple waiting pattern detection</li>
+                        <li>Compatible with modern JavaScript environments</li>
+                    </ul>
+                </div>
+
+                <div class="demo-section">
+                    <h3>System Limitations</h3>
+                    <div class="alert alert-warning">
+                        <strong>Important:</strong> This demo version has some limitations in yaku detection:
+                    </div>
+
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0;">
+                        <div class="feature-card">
+                            <h4>Not Implemented</h4>
+                            <ul style="text-align: left; line-height: 1.6;">
+                                <li>Chankan (槍槓)</li>
+                                <li>Ippatsu (一發)</li>
+                                <li>Suukansanra (四槓散了)</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>Partially Supported</h4>
+                            <ul style="text-align: left; line-height: 1.6;">
+                                <li>Tenhou (天和)</li>
+                                <li>Chihou (地和)</li>
+                                <li>Renhou (人和)</li>
+                                <li>Double Riichi (兩立直)</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>Best Supported</h4>
+                            <ul style="text-align: left; line-height: 1.6;">
+                                <li>Standard sequences & triplets</li>
+                                <li>Color-based yaku</li>
+                                <li>Terminal & honor patterns</li>
+                                <li>Most 1-6 han yaku</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <p style="text-align: center; margin-top: 15px;">
+                        <strong>Recommendation:</strong> Use standard 14-tile winning hands for the most accurate yaku
+                        detection.
+                    </p>
+                </div>
+
+                <div class="demo-section">
+                    <h3>Quick Start</h3>
+                    <div class="alert alert-info">
+                        <strong>Try the Hand Analyzer!</strong> Switch to the "Hand Analyzer" tab to input tile
+                        combinations and see yaku detection in action.
+                    </div>
+                    <p>Input format examples:</p>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li><span class="code">123m456p789s1122z</span> - Mixed tiles with pairs</li>
+                        <li><span class="code">111222333m44455p</span> - Triplets and sequences</li>
+                        <li><span class="code">19m19p19s1234567z</span> - Terminals and honors</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="analyzer" class="tab-content">
+                <div class="demo-section">
+                    <h3>Interactive Hand Analyzer</h3>
+                    <div class="input-area">
+                        <label for="tilesInput">Enter tile combination (e.g., 123m456p789s1122z):</label>
+                        <textarea id="tilesInput"
+                            placeholder="Enter your tiles here...&#10;Format: numbers + suit (m/p/s for man/pin/sou, z for honors)&#10;Example: 123m456p789s1122z"></textarea>
+                    </div>
+                    <div style="text-align: center;">
+                        <button class="btn" onclick="analyzeTiles()">Analyze Hand</button>
+                        <button class="btn btn-secondary" onclick="loadRandomExample()">Random Example</button>
+                        <button class="btn btn-secondary" onclick="clearInput()">Clear</button>
+                    </div>
+
+                    <div id="analysisResults" style="margin-top: 20px;"></div>
+                </div>
+
+                <div class="demo-section">
+                    <h3>Analysis Options</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="isConcealed" checked> Concealed Hand (Menzen)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="isTsumo"> Self-Draw (Tsumo)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="isRiichi"> Riichi
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="isFirstRound"> First Round
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="examples" class="tab-content">
+                <div class="demo-section">
+                    <h3>Predefined Examples</h3>
+                    <p>Click any example below to load it into the analyzer and see detailed yaku analysis.</p>
+
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0;">
+                        <div class="feature-card">
+                            <h4>Basic Yaku (1-2 Han)</h4>
+                            <button class="btn btn-success" onclick="loadSpecificExample('234m567p234s5566z')">Pinfu +
+                                Tanyao</button>
+                            <button class="btn btn-success" onclick="loadSpecificExample('123m234p345s1122z')">All
+                                Simples</button>
+                            <button class="btn btn-success" onclick="loadSpecificExample('111m456p789s1133z')">Yakuhai
+                                (Honor Triplet)</button>
+                            <button class="btn btn-success" onclick="loadSpecificExample('2244668m2244668p')">Seven
+                                Pairs</button>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>Medium Yaku (2-3 Han)</h4>
+                            <button class="btn btn-success" onclick="loadSpecificExample('123456789m1122m')">Pure
+                                Straight</button>
+                            <button class="btn btn-success" onclick="loadSpecificExample('111m111p111s4455z')">Triple
+                                Triplets</button>
+                            <button class="btn btn-success" onclick="loadSpecificExample('123m123p123s1144z')">Three
+                                Color Runs</button>
+                            <button class="btn btn-success" onclick="loadSpecificExample('111222m333p4455s')">All
+                                Triplets</button>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>High Value Hands (3-6 Han)</h4>
+                            <button class="btn btn-success" onclick="loadSpecificExample('111222333456788m')">Full Flush
+                                (Chinitsu)</button>
+                            <button class="btn btn-success" onclick="loadSpecificExample('123m456m78911z22z')">Half
+                                Flush (Honitsu)</button>
+                            <button class="btn btn-success" onclick="loadSpecificExample('111999m111999p11z')">Terminals
+                                and Honors</button>
+                            <button class="btn btn-success" onclick="loadSpecificExample('123789m123789p11z')">Outside
+                                Hand (Junchan)</button>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>Yakuman Hands</h4>
+                            <button class="btn btn-success" onclick="loadSpecificExample('19m19p19s1234567z')">Thirteen
+                                Orphans</button>
+                            <button class="btn btn-success" onclick="loadSpecificExample('111m222p333s444z5z')">Four
+                                Concealed Triplets</button>
+                            <button class="btn btn-success" onclick="loadSpecificExample('555666777z1122z')">Big Three
+                                Dragons</button>
+                            <button class="btn btn-success" onclick="loadSpecificExample('1111222233334z')">Little Four
+                                Winds</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="demo-section">
+                    <h3>Hand Generator</h3>
+                    <p>Generate different types of random hands for practice and exploration:</p>
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
+                        <button class="btn" onclick="generateRandomHand('basic')">Basic Winning Hand</button>
+                        <button class="btn" onclick="generateRandomHand('complex')">Complex Pattern</button>
+                        <button class="btn" onclick="generateRandomHand('honors')">Honor Heavy</button>
+                        <button class="btn" onclick="generateRandomHand('terminals')">Terminal Heavy</button>
+                        <button class="btn" onclick="generateRandomHand('mixed')">Mixed Suits</button>
+                        <button class="btn" onclick="generateRandomHand('flush')">Single Suit</button>
+                    </div>
+                </div>
+
+                <div class="demo-section">
+                    <h3>Learning Corner</h3>
+                    <div class="alert alert-info">
+                        <strong>Tip:</strong> Each example demonstrates different yaku patterns. After loading an
+                        example,
+                        switch to the "Hand Analyzer" tab to see the detailed breakdown of yaku, han value, and scoring.
+                    </div>
+
+                    <h4>Common Patterns Explained:</h4>
+                    <ul style="line-height: 1.8; margin-left: 20px;">
+                        <li><strong>Pinfu:</strong> Four sequences and a simple wait (no points from groups or wait)
+                        </li>
+                        <li><strong>Tanyao:</strong> Only uses number tiles 2-8 (no terminals or honors)</li>
+                        <li><strong>Chinitsu:</strong> All tiles from one suit only (6 han if closed, 5 han if open)
+                        </li>
+                        <li><strong>Kokushi:</strong> One each of all terminals and honors plus one pair (Yakuman)</li>
+                        <li><strong>Suuankou:</strong> Four concealed triplets (Yakuman)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="custom" class="tab-content">
+                <div class="demo-section">
+                    <h3>Custom Yaku Creator</h3>
+                    <p>Create your own custom yaku rules using the same format as the built-in yaku system. Define
+                        requirements, han values, and register them directly into the yaku registry.</p>
+
+                    <div class="alert alert-info">
+                        <strong>📚 New Feature:</strong> Custom yakus now use the same format as built-in yakus from
+                        <code>register.ts</code>.
+                        Use the <strong>🔍 Browse All Yakus</strong> button to see all registered yakus and manage them!
+                    </div>
+
+                    <div class="input-area">
+                        <label for="customYakuName">Yaku Name:</label>
+                        <input type="text" id="customYakuName" placeholder="e.g., All Even Numbers"
+                            style="height: 40px;">
+                    </div>
+
+                    <div class="input-area">
+                        <label for="customYakuHan">Han Value:</label>
+                        <input type="number" id="customYakuHan" min="1" max="13" value="1" style="height: 40px;">
+                    </div>
+
+                    <div class="input-area">
+                        <label for="customYakuDefinition">Yaku Definition (JSON):</label>
+                        <textarea id="customYakuDefinition"
+                            style="height: 200px; font-family: 'Courier New', monospace;"></textarea>
+                    </div>
+
+                    <div style="text-align: center; margin: 20px 0;">
+                        <button class="btn btn-success add-yaku-btn" onclick="addCustomYaku()">Add Custom Yaku</button>
+                        <button class="btn btn-success save-edit-btn" onclick="" style="display: none;">Save
+                            Changes</button>
+                        <button class="btn btn-secondary cancel-edit-btn" onclick="cancelEditYaku()"
+                            style="display: none;">Cancel Edit</button>
+                        <button class="btn" onclick="testCustomYaku()" class="test-custom-yaku-btn">Test with Current
+                            Hand</button>
+                        <button class="btn btn-info" onclick="showYakuLibrary()">Browse Yaku Library</button>
+                        <button class="btn btn-primary" onclick="showYakuBrowser()">🔍 Browse All Yakus</button>
+                        <button class="btn btn-secondary" onclick="clearCustomYaku()">Clear All</button>
+                    </div>
+
+                    <div
+                        style="text-align: center; margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                        <strong>Custom Yaku Cache:</strong>
+                        <button class="btn btn-sm btn-primary" onclick="saveCustomYakuCache()">💾 Save to Cache</button>
+                        <button class="btn btn-sm btn-success" onclick="loadCustomYakuCache()">📂 Load from
+                            Cache</button>
+                        <small style="display: block; margin-top: 5px; color: #666;">
+                            Cache persists your custom yaku between sessions
+                        </small>
+                    </div>
+
+                    <div id="customYakuTestResult" style="margin-top: 20px;"></div>
+                </div>
+
+                <div class="demo-section">
+                    <h3>Custom Yaku Examples</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                        <div class="feature-card">
+                            <h4>All Even Numbers</h4>
+                            <button class="btn btn-success" onclick="loadCustomYakuExample('allEven')">Load
+                                Example</button>
+                            <p style="margin-top: 10px; font-size: 0.9em;">Detects hands with only even-numbered tiles
+                                (2,4,6,8)</p>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>Rainbow Hand</h4>
+                            <button class="btn btn-success" onclick="loadCustomYakuExample('rainbow')">Load
+                                Example</button>
+                            <p style="margin-top: 10px; font-size: 0.9em;">Requires tiles from all three number suits
+                            </p>
+                        </div>
+
+                        <div class="feature-card">
+                            <h4>Lucky Seven</h4>
+                            <button class="btn btn-success" onclick="loadCustomYakuExample('lucky7')">Load
+                                Example</button>
+                            <p style="margin-top: 10px; font-size: 0.9em;">Hand must contain at least 3 sevens</p>
+                        </div>
+                    </div>
+
+                    <div class="demo-section" style="margin-top: 30px;">
+                        <h4>📋 Yaku Registry Requirements Format:</h4>
+                        <div class="alert alert-success">
+                            <p>Custom yakus now use the same <code>RonRequirements</code> format as built-in yakus. See
+                                the <strong>Documentation</strong> tab for detailed examples and format reference.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="demo-section">
+                    <h3>Active Custom Yaku</h3>
+                    <div id="activeCustomYaku">
+                        <p>No custom yaku defined yet. Create one above!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="docs" class="tab-content">
+                <div class="demo-section">
+                    <h3>🎯 Yaku Registry System Documentation</h3>
+                    <div class="alert alert-success">
+                        <strong>New System!</strong> Custom yakus now use the same registry format as built-in yakus
+                        from <code>register.ts</code>.
+                        This ensures consistency and full compatibility with the yaku analysis engine.
+                    </div>
+
+                    <h4>📋 RonRequirements Format Reference</h4>
+                    <p>Custom yakus use the <code>RonRequirements</code> interface. Here are the main properties:</p>
+
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <h5>🔧 Main Properties</h5>
+                        <ul style="line-height: 1.8;">
+                            <li><code><strong>requires</strong>: Requirement[]</code> - Array of tile/unit requirements
+                            </li>
+                            <li><code><strong>requireConcealed</strong>: boolean</code> - Must be closed hand (menzen)
+                            </li>
+                            <li><code><strong>requireOpen</strong>: boolean</code> - Must have open melds</li>
+                            <li><code><strong>requiredTsumo</strong>: boolean</code> - Must be self-draw win</li>
+                            <li><code><strong>requiredLastRound</strong>: boolean</code> - Must be last round</li>
+                            <li><code><strong>requiredFirstRound</strong>: boolean</code> - Must be first round</li>
+                            <li><code><strong>isOr</strong>: boolean</code> - Requirements are OR (instead of AND)</li>
+                            <li><code><strong>specialCondition</strong>: function</code> - Custom validation logic</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <h5>🧩 Requirement Object Properties</h5>
+                        <ul style="line-height: 1.8;">
+                            <li><code><strong>minUnits</strong></code> - Minimum required units (Koutsu, Shuntsu, etc.)
+                            </li>
+                            <li><code><strong>allowedSuits</strong></code> - Only these suits allowed</li>
+                            <li><code><strong>allowedNumbers</strong></code> - Only these numbers allowed</li>
+                            <li><code><strong>requiredSuits</strong></code> - Must contain these suits</li>
+                            <li><code><strong>requiredNumbers</strong></code> - Must contain these numbers</li>
+                            <li><code><strong>filteredNumbers</strong></code> - These numbers not allowed</li>
+                            <li><code><strong>unitRepeat</strong></code> - Same unit must repeat N times</li>
+                            <li><code><strong>dynamicRequirement</strong></code> - Dynamic conditions (Jihai, Bakaze)
+                            </li>
+                        </ul>
+                    </div>
+
+                    <h4>📚 Examples from Built-in Yakus</h4>
+
+                    <div class="demo-section">
+                        <h5>Example 1: Simple Requirements (Tanyao)</h5>
+                        <pre style="background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto;"><code>{
+  "requires": [
+    {
+      "filteredNumbers": [1, 9],
+      "allowedSuits": ["MAN", "PIN", "SOU"]
+    }
+  ]
+}</code></pre>
+                        <p><em>This yaku excludes terminals (1,9) and only allows number suits.</em></p>
+                    </div>
+
+                    <div class="demo-section">
+                        <h5>Example 2: Unit Requirements (Toitoihou - All Triplets)</h5>
+                        <pre style="background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto;"><code>{
+  "requires": [
+    {
+      "minUnits": {
+        "Koutsu": 4,
+        "Toitsu": 1
+      }
+    },
+    {
+      "minUnits": {
+        "Koutsu": 2,
+        "Kantsu": 2
+      }
+    }
+  ],
+  "isOr": true
+}</code></pre>
+                        <p><em>Requires either 4 triplets + 1 pair OR 2 triplets + 2 quads.</em></p>
+                    </div>
+
+                    <div class="demo-section">
+                        <h5>Example 3: Concealed Requirement (Pinfu)</h5>
+                        <pre style="background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto;"><code>{
+  "requires": [
+    {
+      "minUnits": {
+        "Shuntsu": 3,
+        "Toitsu": 1,
+        "RyanmenTatsu": 1
+      },
+      "requiredSuits": ["MAN", "PIN", "SOU"]
+    }
+  ],
+  "requireConcealed": true
+}</code></pre>
+                        <p><em>Requires sequences and must be concealed hand.</em></p>
+                    </div>
+
+                    <div class="demo-section">
+                        <h5>Example 4: Unit Repetition (Iipeikou - Two Identical Sequences)</h5>
+                        <pre style="background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto;"><code>{
+  "requires": [
+    {
+      "minUnits": { "Shuntsu": 1 },
+      "unitRepeat": 2
+    }
+  ],
+  "requireConcealed": true
+}</code></pre>
+                        <p><em>Requires the same sequence to appear twice, must be concealed.</em></p>
+                    </div>
+
+                    <div class="demo-section">
+                        <h5>Example 5: Dynamic Requirements (Jihai - Seat Wind)</h5>
+                        <pre style="background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto;"><code>{
+  "requires": [
+    {
+      "minUnits": { "Koutsu": 1 },
+      "dynamicRequirement": ["Jihai"]
+    }
+  ]
+}</code></pre>
+                        <p><em>Requires triplet of player's seat wind (dynamic based on game state).</em></p>
+                    </div>
+
+                    <div class="demo-section">
+                        <h5>Example 6: Multiple Conditions with OR (Toitoihou - All Triplets)</h5>
+                        <pre style="background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto;"><code>{
+  "requires": [
+    {
+      "minUnits": {
+        "Koutsu": 4,
+        "Toitsu": 1
+      }
+    },
+    {
+      "minUnits": {
+        "Koutsu": 2,
+        "Kantsu": 2
+      }
+    }
+  ],
+  "isOr": true
+}</code></pre>
+                        <p><em>Accepts either 4 triplets + pair OR 2 triplets + 2 quads.</em></p>
+                    </div>
+
+                    <div class="demo-section">
+                        <h5>Example 7: Special Conditions (Last Round)</h5>
+                        <pre style="background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto;"><code>{
+  "requiredLastRound": true,
+  "requiredTsumo": true
+}</code></pre>
+                        <p><em>Haitei Tsumo - must be last tile draw of the game.</em></p>
+                    </div>
+
+                    <div class="demo-section">
+                        <h5>Example 8: Mixed Conditions (Honroutou - Mixed Terminals)</h5>
+                        <pre style="background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto;"><code>{
+  "requires": [
+    {
+      "allowedSuits": ["MAN", "PIN", "SOU"],
+      "allowedNumbers": [1, 9]
+    },
+    {
+      "allowedSuits": ["WIND", "DRAGON"],
+      "allowedNumbers": [1, 2, 3, 4]
+    }
+  ]
+}</code></pre>
+                        <p><em>Allows only terminals (1,9) and honor tiles.</em></p>
+                    </div>
+
+                    <h4>🎮 Available Constants</h4>
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                        <h5>MahjongSimpleUnits:</h5>
+                        <code>Shuntsu, Koutsu, Toitsu, Kantsu, RyanmenTatsu, Ippatsu</code>
+
+                        <h5 style="margin-top: 15px;">MahjongSuits:</h5>
+                        <code>MAN (0), PIN (1), SOU (2), WIND (3), DRAGON (4)</code>
+
+                        <h5 style="margin-top: 15px;">Numbers:</h5>
+                        <code>1-9 for number tiles, 1-4 for winds (E,S,W,N), 1-3 for dragons (Wh,Gr,Re)</code>
+                    </div>
+
+                    <h4>🛠️ How to Create Custom Yaku</h4>
+                    <ol style="line-height: 1.8; margin-left: 20px;">
+                        <li><strong>Study Examples:</strong> Look at built-in yakus in the browser</li>
+                        <li><strong>Define Requirements:</strong> Use the RonRequirements format</li>
+                        <li><strong>Test JSON:</strong> Validate your JSON syntax</li>
+                        <li><strong>Add Yaku:</strong> Use the Custom Yaku Creator</li>
+                        <li><strong>Test & Verify:</strong> Try with different hands</li>
+                        <li><strong>Save to Cache:</strong> Persist your custom yakus</li>
+                    </ol>
+
+                    <h4>📖 Quick Reference Guide</h4>
+                    <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <h5>🎯 Common Patterns</h5>
+                        <ul style="line-height: 1.8;">
+                            <li><strong>All Same Type:</strong> <code>allowedSuits: ["MAN"]</code></li>
+                            <li><strong>No Terminals:</strong> <code>filteredNumbers: [1, 9]</code></li>
+                            <li><strong>Only Honors:</strong> <code>allowedSuits: ["WIND", "DRAGON"]</code></li>
+                            <li><strong>Must be Concealed:</strong> <code>requireConcealed: true</code></li>
+                            <li><strong>Same Sequence Twice:</strong> <code>unitRepeat: 2</code></li>
+                            <li><strong>All Triplets:</strong> <code>minUnits: { "Koutsu": 4 }</code></li>
+                            <li><strong>Self-Draw Only:</strong> <code>requiredTsumo: true</code></li>
+                        </ul>
+                    </div>
+
+                    <h4>💡 Pro Tips for Custom Yakus</h4>
+                    <div style="background: #fff9e6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <h5>✅ Best Practices</h5>
+                        <ul>
+                            <li><strong>Start Simple:</strong> Begin with basic tile/suit restrictions</li>
+                            <li><strong>Test Thoroughly:</strong> Try different hand combinations</li>
+                            <li><strong>Use Built-in Examples:</strong> Study existing yakus for patterns</li>
+                            <li><strong>Validate JSON:</strong> Ensure proper syntax before adding</li>
+                            <li><strong>Name Clearly:</strong> Use descriptive names for custom yakus</li>
+                        </ul>
+
+                        <h5 style="margin-top: 15px;">⚠️ Common Mistakes</h5>
+                        <ul>
+                            <li>Forgetting quotes around string values</li>
+                            <li>Using wrong suit names (use CAPS: MAN, PIN, SOU, WIND, DRAGON)</li>
+                            <li>Invalid number ranges for different suits</li>
+                            <li>Conflicting requirements (e.g., concealed + open)</li>
+                            <li>Too restrictive conditions (impossible hands)</li>
+                        </ul>
+                    </div>
+
+                    <div class="alert alert-success">
+                        <strong>🎉 Ready to Create?</strong> Use the Yaku Browser above to view all existing yakus,
+                        then try the Custom Yaku Creator to make your own! Your custom yakus will integrate
+                        seamlessly with the analysis system.
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <strong>⚠️ Important Notes:</strong>
+                        <ul style="margin-top: 10px;">
+                            <li>Custom yakus are registered directly into the yaku system</li>
+                            <li>They work exactly like built-in yakus during analysis</li>
+                            <li>Use the Yaku Browser to manage all yakus</li>
+                            <li>Invalid JSON will be rejected with error messages</li>
+                            <li>Complex conditions may require specialCondition functions</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    <button class="btn btn-success btn-lg" onclick="startCustomYakuTour()">🎯 Start Interactive
+                        Tour</button>
+                    <button class="btn btn-info" onclick="showTab('custom')">Go to Custom Yaku Creator</button>
+                </div>
+            </div>
+
+            <div class="demo-section">
+                <h3>What Are Custom Yaku? 🤔</h3>
+                <p>Custom yaku are user-defined scoring patterns that go beyond traditional mahjong rules. With our
+                    JSON-based system, you can:</p>
+                <ul style="line-height: 1.8; margin-left: 20px;">
+                    <li>✅ Create unique scoring patterns</li>
+                    <li>✅ Experiment with new mahjong variants</li>
+                    <li>✅ Learn about pattern recognition</li>
+                    <li>✅ Share your creations with others</li>
+                    <li>✅ No programming knowledge required!</li>
+                </ul>
+            </div>
+
+            <div class="demo-section">
+                <h3>Step-by-Step Tutorial 📖</h3>
+
+                <div class="tutorial-step">
+                    <h4>Step 1: Understanding Registry Format</h4>
+                    <p>Custom yakus use the same RonRequirements format as built-in yakus from the registry system:</p>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                        <strong>Example - No Terminals:</strong>
+                        <pre style="margin: 10px 0;"><code>{
+  "requires": [
+    {
+      "filteredNumbers": [1, 9],
+      "allowedSuits": ["MAN", "PIN", "SOU"]
+    }
+  ]
+}</code></pre>
+                        <p><strong>What this means:</strong> Hand cannot contain 1s or 9s (terminals), and only number
+                            suits are allowed.</p>
+                    </div>
+                </div>
+
+                <div class="tutorial-step">
+                    <h4>Step 2: Registry Properties Explained</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                        <div class="definition-type-card">
+                            <h5>🎯 allowedNumbers</h5>
+                            <p>Only these numbers are allowed</p>
+                            <code>"allowedNumbers": [2,4,6,8]</code>
+                        </div>
+                        <div class="definition-type-card">
+                            <h5>🌈 requiredSuits</h5>
+                            <p>Hand must contain these suits</p>
+                            <code>"requiredSuits": ["MAN","PIN","SOU"]</code>
+                        </div>
+                        <div class="definition-type-card">
+                            <h5>🔢 minUnits</h5>
+                            <p>Minimum required tile units</p>
+                            <code>"minUnits": {"Koutsu": 3}</code>
+                        </div>
+                        <div class="definition-type-card">
+                            <h5>👑 requireConcealed</h5>
+                            <p>Hand must be concealed (menzen)</p>
+                            <code>"requireConcealed": true</code>
+                        </div>
+                        <div class="definition-type-card">
+                            <h5>🚫 filteredNumbers</h5>
+                            <p>These numbers are not allowed</p>
+                            <code>"filteredNumbers": [1,9]</code>
+                        </div>
+                        <div class="definition-type-card">
+                            <h5>🔚 requiredTsumo</h5>
+                            <p>Must be won by self-draw</p>
+                            <code>"requiredTsumo": true</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tutorial-step">
+                    <h4>Step 3: Creating Your First Custom Yaku</h4>
+                    <ol style="line-height: 1.8; margin-left: 20px;">
+                        <li>Go to the <strong>Custom Yaku</strong> tab</li>
+                        <li>Enter a name for your yaku (e.g., "No Terminals")</li>
+                        <li>Set the han value (1-13)</li>
+                        <li>Paste or type your RonRequirements definition</li>
+                        <li>Click "Add Custom Yaku"</li>
+                        <li>Test it with sample hands!</li>
+                    </ol>
+
+                    <div class="alert alert-success">
+                        <strong>💡 Pro Tip:</strong> Use the "Browse Yaku Library" button to see pre-made examples and
+                        learn from them!
+                    </div>
+                </div>
+
+                <div class="tutorial-step">
+                    <h4>Step 4: Testing and Managing Your Yaku</h4>
+                    <ul style="line-height: 1.8; margin-left: 20px;">
+                        <li><strong>Test Button:</strong> Quickly test your yaku against the current hand in the
+                            analyzer</li>
+                        <li><strong>Edit Function:</strong> Click "Edit" on any yaku to modify it</li>
+                        <li><strong>Remove Option:</strong> Delete yaku you no longer need</li>
+                        <li><strong>Integration:</strong> All custom yaku automatically appear in hand analysis results
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="demo-section">
+                <h3>Advanced Examples & Best Practices 🎨</h3>
+
+                <div class="advanced-example">
+                    <h4>Example 1: Complex Pattern - "Lucky Sevens"</h4>
+                    <p>A yaku that requires multiple 7s in the hand:</p>
+                    <pre style="background: #f8f9fa; padding: 15px; border-radius: 8px;"><code>{
+  "requires": [
+    {
+      "requiredNumbers": [7],
+      "allowedSuits": ["MAN", "PIN", "SOU"]
+    }
+  ]
+}</code></pre>
+                </div>
+
+                <div class="advanced-example">
+                    <h4>Example 2: Suit Restriction - "No Circles"</h4>
+                    <p>A pattern that excludes pin (circle) tiles completely:</p>
+                    <pre style="background: #f8f9fa; padding: 15px; border-radius: 8px;"><code>{
+  "requires": [
+    {
+      "allowedSuits": ["MAN", "SOU", "WIND", "DRAGON"]
+    }
+  ]
+}</code></pre>
+                </div>
+
+                <div class="best-practices">
+                    <h4>🏆 Best Practices</h4>
+                    <ul style="line-height: 1.8; margin-left: 20px;">
+                        <li><strong>Start Simple:</strong> Begin with basic patterns before creating complex rules</li>
+                        <li><strong>Test Thoroughly:</strong> Use various hand combinations to verify your yaku works
+                            correctly</li>
+                        <li><strong>Reasonable Han Values:</strong> Keep han values balanced (1-3 for common patterns,
+                            4+ for rare ones)</li>
+                        <li><strong>Clear Names:</strong> Use descriptive names that explain what the yaku does</li>
+                        <li><strong>Follow Registry Format:</strong> Use the same RonRequirements format as built-in
+                            yakus</li>
+                        <li><strong>Study Examples:</strong> Check the documentation examples to understand the registry
+                            format</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="demo-section">
+                <h3>Built-in Yaku Reference</h3>
+                <div style="columns: 2; gap: 30px;">
+                    <div>
+                        <h4>1 Han</h4>
+                        <ul style="list-style-position: inside;">
+                            <li>Riichi</li>
+                            <li>Menzen Tsumo</li>
+                            <li>Pinfu</li>
+                            <li>Tanyao</li>
+                            <li>Yakuhai</li>
+                            <li>Ippatsu</li>
+                            <li>Rinshan Kaihou</li>
+                            <li>Chankan</li>
+                            <li>Haitei</li>
+                            <li>Houtei</li>
+                        </ul>
+
+                        <h4>2 Han</h4>
+                        <ul style="list-style-position: inside;">
+                            <li>Double Riichi</li>
+                            <li>Chitoitsu</li>
+                            <li>Chanta</li>
+                            <li>Ittsu</li>
+                            <li>Sanshoku Doujun</li>
+                            <li>Sanshoku Doukou</li>
+                            <li>Sankantsu</li>
+                            <li>Toitoi</li>
+                            <li>Sanankou</li>
+                            <li>Shousangen</li>
+                            <li>Honroutou</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4>3 Han</h4>
+                        <ul style="list-style-position: inside;">
+                            <li>Honitsu</li>
+                            <li>Junchan</li>
+                            <li>Ryanpeikou</li>
+                        </ul>
+
+                        <h4>6 Han</h4>
+                        <ul style="list-style-position: inside;">
+                            <li>Chinitsu</li>
+                        </ul>
+
+                        <h4>Yakuman</h4>
+                        <ul style="list-style-position: inside;">
+                            <li>Kokushi Musou</li>
+                            <li>Suuankou</li>
+                            <li>Daisangen</li>
+                            <li>Shousuushii</li>
+                            <li>Daisuushii</li>
+                            <li>Tsuuiisou</li>
+                            <li>Chinroutou</li>
+                            <li>Ryuuiisou</li>
+                            <li>Chuuren Poutou</li>
+                            <li>Suukantsu</li>
+                            <li>Tenhou</li>
+                            <li>Chiihou</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-section">
+                <h3>Tile Format Guide</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                    <div>
+                        <h4>Number Tiles</h4>
+                        <ul style="list-style-position: inside;">
+                            <li><span class="code">1-9m</span> - Manzu (Characters)</li>
+                            <li><span class="code">1-9p</span> - Pinzu (Circles)</li>
+                            <li><span class="code">1-9s</span> - Souzu (Bamboo)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Honor Tiles</h4>
+                        <ul style="list-style-position: inside;">
+                            <li><span class="code">1z</span> - East Wind</li>
+                            <li><span class="code">2z</span> - South Wind</li>
+                            <li><span class="code">3z</span> - West Wind</li>
+                            <li><span class="code">4z</span> - North Wind</li>
+                            <li><span class="code">5z</span> - White Dragon</li>
+                            <li><span class="code">6z</span> - Green Dragon</li>
+                            <li><span class="code">7z</span> - Red Dragon</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Yaku Library Modal -->
+    <div id="yakuLibraryModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Custom Yaku Library 📚</h3>
+                <button class="modal-close"
+                    onclick="document.getElementById('yakuLibraryModal').style.display='none'">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Select from our collection of pre-made custom yaku:</p>
+                <div id="yakuLibraryContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Yaku Manager Modal -->
+    <div id="yakuManagerModal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>System Yaku Manager ⚙️</h3>
+                <button class="modal-close"
+                    onclick="document.getElementById('yakuManagerModal').style.display='none'">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="yakuManagerContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Yaku Browser Modal -->
+    <div id="yakuBrowserModal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>🔍 Yaku Browser & Manager</h3>
+                <button class="modal-close"
+                    onclick="document.getElementById('yakuBrowserModal').style.display='none'">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="yakuBrowserContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tour Overlay -->
+    <div id="tourOverlay" class="tour-overlay" style="display: none;">
+        <div id="tourContent" class="tour-content"></div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>
