@@ -150,7 +150,7 @@ mahjong-demo/
 │       ├── tiles/             # Tile system
 │       ├── typecheck/         # Yaku detection
 │       ├── score/             # Scoring system
-│       ├── hand/              # Hand analysis
+│       └── hand/              # Hand analysis
 ├── index.html                 # Main HTML file
 ├── vite.config.ts            # Vite configuration
 ├── package.json              # Dependencies and scripts
